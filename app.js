@@ -1,92 +1,105 @@
 ```javascript
 "use strict";
 
-/* DICE CASINO — совместимый app.js */
-
 (() => {
-  const $ = id => document.getElementById(id);
+  const $ = (id) => document.getElementById(id);
 
-  const STORAGE = "dice_casino_state_v2";
-  const PROMO = "gsusyfshdhzjdbsvfs";
+  const STORAGE_KEY = "dice_casino_state_v2";
+  const PROMO_CODE = "gsusyfshdhzjdbsvfs";
 
-  let user;
-  let currentScreen = "homeScreen";
-  let currentGame = "wheel";
-  let selectedBet = null;
-  let bet = 1000;
-  let busy = false;
-  let roundNumber = 1;
-  let timerInterval = null;
-  let toastTimer = null;
-  let resultTimer = null;
-  let history = [];
+  const SCREENS = [
+    "homeScreen",
+    "gamesScreen",
+    "gameScreen",
+    "profileScreen",
+    "topScreen",
+    "moreScreen"
+  ];
 
-  const gameNames = {
+  const GAME_NAMES = {
     wheel: "Dice Wheel",
     dice: "Dice",
     zeus: "Dice Zeus",
     house: "Dice House"
   };
 
-  const defaultUser = () => ({
-    nickname: "Игрок",
-    nicknameColor: "#ffffff",
-    balance: 10000,
-    totalWon: 0,
-    totalLost: 0,
-    weekWon: 0,
-    weekLost: 0,
-    rounds: 0,
-    createdAt: Date.now(),
-    promoUsed: false,
-    usedPromos: [],
-    createdPromos: [],
-    transactions: []
-  });
+  let user;
+  let currentGame = "wheel";
+  let selectedBet = null;
+  let currentBet = 1000;
+  let busy = false;
+  let roundNumber = 1;
+  let timerId = null;
+  let toastId = null;
+  let resultId = null;
+  let history = [];
+
+  function defaultUser() {
+    return {
+      nickname: "Игрок",
+      nicknameColor: "#ffffff",
+      balance: 10000,
+      totalWon: 0,
+      totalLost: 0,
+      weekWon: 0,
+      weekLost: 0,
+      promoUsed: false,
+      createdPromos: []
+    };
+  }
 
   function loadUser() {
     try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE) || "null");
-      return saved ? { ...defaultUser(), ...saved } : defaultUser();
-    } catch {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored
+        ? { ...defaultUser(), ...JSON.parse(stored) }
+        : defaultUser();
+    } catch (error) {
+      console.error("Ошибка чтения сохранения:", error);
       return defaultUser();
     }
   }
 
-  function save() {
+  function saveUser() {
     try {
-      localStorage.setItem(STORAGE, JSON.stringify(user));
-    } catch (e) {
-      console.error("Не удалось сохранить данные", e);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+    } catch (error) {
+      console.error("Ошибка сохранения:", error);
     }
   }
 
-  function fmt(value) {
+  function formatNumber(value) {
     return Math.floor(Number(value) || 0).toLocaleString("ru-RU");
   }
 
-  function money(value) {
-    return (Math.max(0, Number(value) || 0) * 0.0009)
-      .toLocaleString("ru-RU", { maximumFractionDigits: 2 }) + " ₽";
-  }
+  function notify(message) {
+    const toast = $("toast");
 
-  function toast(message) {
-    const el = $("toast");
-
-    if (!el) {
+    if (!toast) {
       alert(message);
       return;
     }
 
-    el.textContent = message;
-    el.classList.add("show");
-    el.style.display = "block";
-    clearTimeout(toastTimer);
+    toast.textContent = message;
+    toast.style.display = "block";
+    toast.classList.add("show");
 
-    toastTimer = setTimeout(() => {
-      el.classList.remove("show");
-      el.style.display = "";
+    clearTimeout(toastId);
+    toastId = setTimeout(() => {
+      toast.classList.remove("show");
+      toast.style.display = "";
     }, 2600);
+  }
+
+  function getPlayerId() {
+    let id = localStorage.getItem("dice_casino_player_id");
+
+    if (!id) {
+      id = String(Math.floor(100000 + Math.random() * 900000));
+      localStorage.setItem("dice_casino_player_id", id);
+    }
+
+    return id;
   }
 
   function updateBalance() {
@@ -102,100 +115,91 @@
     };
 
     Object.entries(values).forEach(([id, value]) => {
-      const el = $(id);
-      if (el) el.textContent = fmt(value);
+      const element = $(id);
+      if (element) element.textContent = formatNumber(value);
     });
 
-    const nick = $("profileNickname");
-    if (nick) {
-      nick.textContent = user.nickname;
-      nick.style.color = user.nicknameColor;
+    if ($("profileNickname")) {
+      $("profileNickname").textContent = user.nickname;
+      $("profileNickname").style.color = user.nicknameColor;
     }
 
-    const avatar = $("profileAvatar");
-    if (avatar) avatar.textContent = user.nickname.slice(0, 1).toUpperCase();
-
-    const id = $("profileId");
-    if (id) id.textContent = "ID: " + getPlayerId();
-
-    const rank = $("profileRank");
-    if (rank) rank.textContent = "Локальный рейтинг";
-
-    const potential = $("potentialWin");
-    if (potential) {
-      potential.textContent = fmt(bet * (selectedBet?.multiplier || 12));
+    if ($("profileAvatar")) {
+      $("profileAvatar").textContent =
+        (user.nickname || "И").slice(0, 1).toUpperCase();
     }
 
-    save();
+    if ($("profileId")) {
+      $("profileId").textContent = "ID: " + getPlayerId();
+    }
+
+    updatePotentialWin();
+    saveUser();
   }
 
-  function getPlayerId() {
-    let id = localStorage.getItem("dice_casino_player_id");
-    if (!id) {
-      id = String(Math.floor(100000 + Math.random() * 900000));
-      localStorage.setItem("dice_casino_player_id", id);
-    }
-    return id;
+  function updatePotentialWin() {
+    const element = $("potentialWin");
+    if (!element) return;
+
+    const multiplier = selectedBet ? selectedBet.multiplier : 12;
+    element.textContent = formatNumber(currentBet * multiplier);
   }
 
+  // НАВИГАЦИЯ
   function navigateTo(screenId) {
-    const screen = $(screenId);
-
-    if (!screen || !screen.classList.contains("screen")) {
-      toast("Раздел не найден: " + screenId);
+    if (!SCREENS.includes(screenId) || !$(screenId)) {
+      console.error("Экран не найден:", screenId);
+      notify("Не удалось открыть раздел: " + screenId);
       return;
     }
 
-    currentScreen = screenId;
-
-    document.querySelectorAll(".screen").forEach(el => {
-      const active = el.id === screenId;
-      el.classList.toggle("active", active);
-      el.hidden = !active;
-      el.setAttribute("aria-hidden", String(!active));
+    SCREENS.forEach(id => {
+      const screen = $(id);
+      screen.classList.toggle("active", id === screenId);
+      screen.hidden = id !== screenId;
+      screen.setAttribute("aria-hidden", String(id !== screenId));
     });
 
-    document.querySelectorAll(".nav-item").forEach(el => {
-      el.classList.toggle("active", el.dataset.screen === screenId);
+    document.querySelectorAll(".nav-item").forEach(button => {
+      button.classList.toggle(
+        "active",
+        button.dataset.screen === screenId
+      );
     });
 
-    updateBalance();
-
-    if (screenId === "topScreen") renderLeaderboard();
     if (screenId === "profileScreen") renderProfile();
+    if (screenId === "topScreen") renderLeaderboard();
 
     window.scrollTo({ top: 0, behavior: "smooth" });
+    updateBalance();
   }
 
+  // ИГРЫ
   function openGame(mode) {
-    if (!gameNames[mode]) {
-      toast("Игровой режим не найден");
+    if (!GAME_NAMES[mode]) {
+      notify("Неизвестный игровой режим");
       return;
     }
 
     currentGame = mode;
     selectedBet = null;
 
-    const title = $("gameTitle");
-    if (title) title.textContent = gameNames[mode];
+    if ($("gameTitle")) $("gameTitle").textContent = GAME_NAMES[mode];
+    if ($("roundNumber")) {
+      $("roundNumber").textContent =
+        "#" + String(roundNumber).padStart(6, "0");
+    }
 
-    const status = $("roundStatus");
-    if (status) status.textContent = "Приём ставок";
-
-    const caption = $("stageCaption");
-    if (caption) caption.textContent = "СДЕЛАЙ СТАВКУ";
-
-    const sub = $("stageSubcaption");
-    if (sub) sub.textContent = "Выбери ставку и размер";
-
-    const round = $("roundNumber");
-    if (round) round.textContent = "#" + String(roundNumber).padStart(6, "0");
+    if ($("roundStatus")) $("roundStatus").textContent = "Приём ставок";
+    if ($("stageCaption")) $("stageCaption").textContent = "СДЕЛАЙ СТАВКУ";
+    if ($("stageSubcaption")) {
+      $("stageSubcaption").textContent = "Выбери ставку и её размер";
+    }
 
     renderBetOptions();
-    renderGameStage(true);
-    updateBalance();
+    renderGameStage();
     navigateTo("gameScreen");
-    startRoundTimer();
+    startTimer();
   }
 
   function renderBetOptions() {
@@ -208,17 +212,9 @@
 
     if (currentGame === "wheel") {
       options = [
-        ["Число 2", "number", "2", 12],
-        ["Число 3", "number", "3", 12],
-        ["Число 4", "number", "4", 12],
-        ["Число 5", "number", "5", 12],
-        ["Число 6", "number", "6", 12],
-        ["Число 7", "number", "7", 12],
-        ["Число 8", "number", "8", 12],
-        ["Число 9", "number", "9", 12],
-        ["Число 10", "number", "10", 12],
-        ["Число 11", "number", "11", 12],
-        ["Число 12", "number", "12", 12],
+        ...Array.from({ length: 11 }, (_, i) => [
+          "Число " + (i + 2), "number", String(i + 2), 12
+        ]),
         ["Чёт", "even", "even", 2],
         ["Нечёт", "odd", "odd", 2],
         ["Оба чёрные", "black", "black", 2],
@@ -229,7 +225,9 @@
       ];
     } else if (currentGame === "dice") {
       options = [
-        ...[1, 2, 3, 4, 5, 6].map(n => ["Число " + n, "number", String(n), 6]),
+        ...Array.from({ length: 6 }, (_, i) => [
+          "Число " + (i + 1), "number", String(i + 1), 6
+        ]),
         ["Чёт", "even", "even", 2],
         ["Нечёт", "odd", "odd", 2],
         ["Чёрный", "black", "black", 2],
@@ -237,7 +235,7 @@
       ];
     } else {
       options = [
-        ["Любая пара", "pair", "pair", 2],
+        ["Пара", "pair", "pair", 2],
         ["Три одинаковых", "triple", "triple", 8],
         ["Главный символ", "special", "special", 20]
       ];
@@ -247,126 +245,103 @@
       const button = document.createElement("button");
       button.type = "button";
       button.className = "bet-option";
-      button.innerHTML = "";
+      button.setAttribute("aria-pressed", "false");
 
-      const title = document.createElement("span");
-      title.textContent = label;
+      const name = document.createElement("span");
+      name.textContent = label;
 
       const odds = document.createElement("strong");
       odds.textContent = "×" + multiplier;
 
-      button.append(title, odds);
+      button.append(name, odds);
+
       button.addEventListener("click", () => {
         selectedBet = { type, value, multiplier, label };
 
-        container.querySelectorAll(".bet-option").forEach(el => {
-          el.classList.remove("active", "selected");
-          el.setAttribute("aria-pressed", "false");
+        container.querySelectorAll(".bet-option").forEach(item => {
+          item.classList.remove("active", "selected");
+          item.setAttribute("aria-pressed", "false");
         });
 
         button.classList.add("active", "selected");
         button.setAttribute("aria-pressed", "true");
-
-        updateBalance();
+        updatePotentialWin();
       });
 
       container.appendChild(button);
     });
   }
 
-  function renderGameStage(initial = false) {
+  function renderGameStage(values) {
     const display = $("diceDisplay");
     if (!display) return;
 
     display.replaceChildren();
 
     if (currentGame === "zeus" || currentGame === "house") {
-      const slot = document.createElement("div");
-      slot.className = "slot-frame";
+      const frame = document.createElement("div");
+      frame.className = "slot-frame";
 
-      for (let i = 0; i < 3; i++) {
+      (values || ["?", "?", "?"]).forEach(value => {
         const tile = document.createElement("div");
         tile.className = "slot-die";
-        tile.textContent = initial ? "?" : "6";
-        slot.appendChild(tile);
-      }
+        tile.textContent = value;
+        frame.appendChild(tile);
+      });
 
-      display.appendChild(slot);
+      display.appendChild(frame);
       return;
     }
 
     const count = currentGame === "wheel" ? 2 : 1;
 
-    for (let i = 0; i < count; i++) {
+    (values || Array(count).fill("?")).forEach(value => {
       const die = document.createElement("div");
       die.className = "drawn-die white-die result-die";
-      die.textContent = "?";
+      die.textContent = String(value);
       display.appendChild(die);
-    }
+    });
   }
 
   function setBet(value) {
     const amount = Math.floor(Number(value));
 
     if (!Number.isFinite(amount) || amount < 1) {
-      toast("Ставка должна быть больше нуля");
+      notify("Укажи корректную ставку");
       return;
     }
 
-    bet = amount;
+    currentBet = amount;
 
-    const input = $("betAmount");
-    if (input) input.value = String(bet);
-
-    updateBalance();
+    if ($("betAmount")) $("betAmount").value = String(amount);
+    updatePotentialWin();
   }
 
   function changeBet(direction) {
-    const input = $("betAmount");
-    const current = input ? Number(input.value) : bet;
-    const step = Math.max(100, Math.floor((Number(current) || 1000) * 0.25));
+    const inputValue = Number($("betAmount")?.value || currentBet);
+    const step = Math.max(100, Math.floor(inputValue * 0.25));
 
-    setBet(Math.max(1, (Number(current) || 1000) + direction * step));
-  }
-
-  function readBet() {
-    const input = $("betAmount");
-    const amount = Math.floor(Number(input?.value || bet));
-
-    if (!Number.isFinite(amount) || amount < 1) {
-      toast("Введи корректную сумму ставки");
-      return null;
-    }
-
-    if (amount > user.balance) {
-      toast("Недостаточно монет");
-      return null;
-    }
-
-    bet = amount;
-    return amount;
+    setBet(Math.max(1, inputValue + direction * step));
   }
 
   function placeBet() {
-    if (busy) {
-      toast("Дождись завершения раунда");
-      return;
+    if (busy) return notify("Дождись завершения раунда");
+    if (!selectedBet) return notify("Сначала выбери ставку");
+
+    const amount = Math.floor(Number($("betAmount")?.value || currentBet));
+
+    if (!Number.isFinite(amount) || amount < 1) {
+      return notify("Укажи корректную сумму");
     }
 
-    if (!selectedBet) {
-      toast("Сначала выбери ставку");
-      return;
+    if (amount > user.balance) {
+      return notify("Недостаточно монет");
     }
 
-    const amount = readBet();
-    if (amount === null) return;
-
-    if (currentScreen !== "gameScreen") {
-      toast("Сначала открой игру");
-      return;
-    }
-
+    currentBet = amount;
     busy = true;
+
+    if (timerId) clearInterval(timerId);
 
     const button = $("placeBetButton");
     if (button) {
@@ -374,35 +349,22 @@
       button.textContent = "РАУНД ИДЁТ…";
     }
 
-    const status = $("roundStatus");
-    if (status) status.textContent = "Ставка принята";
-
-    const caption = $("stageCaption");
-    if (caption) caption.textContent = "БРОСОК…";
-
-    const sub = $("stageSubcaption");
-    if (sub) sub.textContent = "Определяем результат раунда";
-
-    if (timerInterval) clearInterval(timerInterval);
-
     user.balance -= amount;
     updateBalance();
 
-    const display = $("diceDisplay");
-    if (display) display.classList.add("rolling");
+    if ($("roundStatus")) $("roundStatus").textContent = "Раунд идёт";
+    if ($("stageCaption")) $("stageCaption").textContent = "БРОСОК…";
 
-    setTimeout(() => finishRound(amount), 1000);
+    setTimeout(() => finishRound(amount), 900);
+  }
+
+  function random(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
   function finishRound(amount) {
-    const display = $("diceDisplay");
-    if (display) {
-      display.classList.remove("rolling");
-      display.replaceChildren();
-    }
-
     let payout = 0;
-    let resultDescription = "";
+    let description = "";
 
     if (currentGame === "wheel") {
       const gold = Math.random() < 0.025;
@@ -410,10 +372,9 @@
       const b = random(1, 6);
       const total = (a === "★" ? 0 : a) + b;
 
-      showDice([a, b]);
-      resultDescription = gold
-        ? "Выпал золотой кубик"
-        : `Выпали ${a} и ${b}. Сумма: ${total}`;
+      renderGameStage([a, b]);
+      description = gold ? "Выпал золотой кубик" :
+        `Кубики: ${a} и ${b}. Сумма: ${total}`;
 
       if (gold) {
         if (selectedBet.type === "gold") payout = amount * 12;
@@ -444,8 +405,8 @@
       }
     } else if (currentGame === "dice") {
       const die = random(1, 6);
-      showDice([die]);
-      resultDescription = "Выпало число " + die;
+      renderGameStage([die]);
+      description = "Выпало число " + die;
 
       switch (selectedBet.type) {
         case "number":
@@ -470,18 +431,17 @@
         : ["HOUSE", "DOG", "BONE", "GEM"];
 
       const reels = [
-        symbols[random(0, symbols.length - 1)],
-        symbols[random(0, symbols.length - 1)],
-        symbols[random(0, symbols.length - 1)]
+        symbols[random(0, 3)],
+        symbols[random(0, 3)],
+        symbols[random(0, 3)]
       ];
 
-      showDice(reels);
-      resultDescription = reels.join(" · ");
+      renderGameStage(reels);
+      description = reels.join(" · ");
 
       const triple = reels[0] === reels[1] && reels[1] === reels[2];
       const pair = reels[0] === reels[1] ||
-        reels[1] === reels[2] ||
-        reels[0] === reels[2];
+        reels[1] === reels[2] || reels[0] === reels[2];
 
       if (selectedBet.type === "special" && triple && reels[0] === symbols[0]) {
         payout = amount * 20;
@@ -494,100 +454,110 @@
 
     const net = payout - amount;
     user.balance += payout;
-    user.rounds += 1;
 
     if (net > 0) {
       user.totalWon += net;
       user.weekWon += net;
-    } else if (net < 0) {
+    } else {
       user.totalLost += Math.abs(net);
       user.weekLost += Math.abs(net);
     }
 
     history.unshift({
       round: roundNumber,
-      game: gameNames[currentGame],
+      game: GAME_NAMES[currentGame],
       net,
-      description: resultDescription,
-      time: new Date().toLocaleTimeString("ru-RU", {
-        hour: "2-digit",
-        minute: "2-digit"
-      })
+      description
     });
 
     history = history.slice(0, 10);
     roundNumber++;
 
-    save();
+    saveUser();
     updateBalance();
     renderHistory();
-    showResult(net, resultDescription);
 
-    const status = $("roundStatus");
-    if (status) status.textContent = "Раунд завершён";
-
-    const caption = $("stageCaption");
-    if (caption) caption.textContent = net > 0 ? "ПОБЕДА" : "РАУНД ЗАВЕРШЁН";
-
-    const sub = $("stageSubcaption");
-    if (sub) sub.textContent = resultDescription;
+    if ($("roundStatus")) $("roundStatus").textContent = "Раунд завершён";
+    if ($("stageCaption")) {
+      $("stageCaption").textContent = net > 0 ? "ПОБЕДА" : "РАУНД ЗАВЕРШЁН";
+    }
+    if ($("stageSubcaption")) $("stageSubcaption").textContent = description;
+    if ($("roundNumber")) {
+      $("roundNumber").textContent =
+        "#" + String(roundNumber).padStart(6, "0");
+    }
 
     busy = false;
 
-    const button = $("placeBetButton");
-    if (button) {
+    if (button = $("placeBetButton")) {
       button.disabled = false;
       button.textContent = "СДЕЛАТЬ СТАВКУ";
     }
 
-    const round = $("roundNumber");
-    if (round) round.textContent = "#" + String(roundNumber).padStart(6, "0");
-
-    startRoundTimer();
+    showResult(net, description);
+    startTimer();
   }
 
-  function random(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+  function showResult(net, description) {
+    const overlay = $("resultOverlay");
+
+    if (!overlay) {
+      notify((net > 0 ? "Вы выиграли " : "Вы проиграли ") +
+        formatNumber(Math.abs(net)));
+      return;
+    }
+
+    if ($("resultTitle")) {
+      $("resultTitle").textContent =
+        net > 0 ? "ВЫ ВЫИГРАЛИ" : "ВЫ ПРОИГРАЛИ";
+    }
+
+    if ($("resultAmount")) {
+      $("resultAmount").textContent = formatNumber(Math.abs(net));
+    }
+
+    if ($("resultDescription")) {
+      $("resultDescription").textContent = description;
+    }
+
+    overlay.classList.add("show");
+    overlay.style.display = "flex";
+
+    clearTimeout(resultId);
+    resultId = setTimeout(closeResult, 4500);
   }
 
-  function showDice(values) {
-    const display = $("diceDisplay");
-    if (!display) return;
+  function closeResult() {
+    const overlay = $("resultOverlay");
+    if (!overlay) return;
 
-    display.replaceChildren();
-
-    values.forEach(value => {
-      const die = document.createElement("div");
-      die.className = "drawn-die white-die result-die";
-      die.textContent = String(value);
-      display.appendChild(die);
-    });
+    overlay.classList.remove("show");
+    overlay.style.display = "";
+    clearTimeout(resultId);
   }
 
-  function startRoundTimer() {
-    if (timerInterval) clearInterval(timerInterval);
+  function startTimer() {
+    clearInterval(timerId);
 
-    let remaining = 15;
-    const timer = $("roundTimer");
-    const status = $("roundStatus");
+    let seconds = 15;
+    if ($("roundTimer")) $("roundTimer").textContent = seconds;
 
-    if (timer) timer.textContent = remaining;
-    if (status) status.textContent = "Приём ставок";
-
-    timerInterval = setInterval(() => {
+    timerId = setInterval(() => {
       if (busy) {
-        clearInterval(timerInterval);
+        clearInterval(timerId);
         return;
       }
 
-      remaining--;
+      seconds--;
 
-      if (timer) timer.textContent = Math.max(0, remaining);
+      if ($("roundTimer")) {
+        $("roundTimer").textContent = Math.max(0, seconds);
+      }
 
-      if (remaining <= 0) {
-        clearInterval(timerInterval);
-        if (status) status.textContent = "Ставки открыты";
-        if (timer) timer.textContent = "∞";
+      if (seconds <= 0) {
+        clearInterval(timerId);
+        if ($("roundStatus")) $("roundStatus").textContent = "Приём ставок";
+        if ($("roundTimer")) $("roundTimer").textContent = "∞";
       }
     }, 1000);
   }
@@ -610,92 +580,24 @@
       const row = document.createElement("div");
       row.className = "history-item";
 
-      const name = document.createElement("span");
-      name.textContent = `#${item.round} · ${item.game} · ${item.time}`;
+      const label = document.createElement("span");
+      label.textContent = `#${item.round} · ${item.game}`;
 
       const result = document.createElement("strong");
-      result.textContent = (item.net >= 0 ? "+" : "−") + fmt(Math.abs(item.net));
+      result.textContent = (item.net >= 0 ? "+" : "−") +
+        formatNumber(Math.abs(item.net));
       result.className = item.net >= 0 ? "positive" : "negative";
 
-      row.append(name, result);
+      row.append(label, result);
       container.appendChild(row);
     });
   }
 
-  function showResult(net, description) {
-    const overlay = $("resultOverlay");
-    if (!overlay) {
-      toast((net >= 0 ? "ВЫ ВЫИГРАЛИ " : "ВЫ ПРОИГРАЛИ ") + fmt(Math.abs(net)));
-      return;
-    }
-
-    const title = $("resultTitle");
-    const amount = $("resultAmount");
-    const desc = $("resultDescription");
-    const card = $("resultCard");
-    const symbol = $("resultSymbol");
-
-    if (title) title.textContent = net > 0 ? "ВЫ ВЫИГРАЛИ" : "ВЫ ПРОИГРАЛИ";
-    if (amount) amount.textContent = fmt(Math.abs(net));
-    if (desc) desc.textContent = description;
-    if (symbol) symbol.textContent = net > 0 ? "★" : "D";
-    if (card) card.classList.toggle("loss", net <= 0);
-
-    overlay.classList.add("show");
-    overlay.style.display = "flex";
-
-    clearTimeout(resultTimer);
-    resultTimer = setTimeout(closeResult, 5000);
-  }
-
-  function closeResult() {
-    const overlay = $("resultOverlay");
-    if (!overlay) return;
-
-    overlay.classList.remove("show");
-    overlay.style.display = "";
-    clearTimeout(resultTimer);
-  }
-
-  function openModal(title, content, actions = []) {
-    const backdrop = $("modalBackdrop");
-    const heading = $("modalTitle");
-    const body = $("modalBody");
-    const actionBox = $("modalActions");
-
-    if (!backdrop || !heading || !body || !actionBox) {
-      alert(title + "\n\n" + content);
-      return;
-    }
-
-    heading.textContent = title;
-    body.replaceChildren();
-    actionBox.replaceChildren();
-
-    if (typeof content === "string") {
-      const p = document.createElement("p");
-      p.textContent = content;
-      body.appendChild(p);
-    } else if (content instanceof Node) {
-      body.appendChild(content);
-    }
-
-    actions.forEach(action => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = action.className || "action-button";
-      button.textContent = action.label;
-      button.addEventListener("click", () => action.onClick());
-      actionBox.appendChild(button);
-    });
-
-    backdrop.classList.add("show");
-    backdrop.style.display = "flex";
-  }
-
+  // МОДАЛЬНЫЕ ОКНА
   function closeModal() {
     const backdrop = $("modalBackdrop");
     if (!backdrop) return;
+
     backdrop.classList.remove("show");
     backdrop.style.display = "";
   }
@@ -704,62 +606,70 @@
     if (event.target === $("modalBackdrop")) closeModal();
   }
 
+  function openModal(title, content, actions = []) {
+    if (!$("modalBackdrop")) {
+      alert(title + "\n" + content);
+      return;
+    }
+
+    $("modalTitle").textContent = title;
+    $("modalBody").replaceChildren();
+    $("modalActions").replaceChildren();
+
+    if (typeof content === "string") {
+      const paragraph = document.createElement("p");
+      paragraph.textContent = content;
+      $("modalBody").appendChild(paragraph);
+    } else {
+      $("modalBody").appendChild(content);
+    }
+
+    actions.forEach(action => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = action.className || "action-button";
+      button.textContent = action.label;
+      button.addEventListener("click", action.onClick);
+      $("modalActions").appendChild(button);
+    });
+
+    $("modalBackdrop").classList.add("show");
+    $("modalBackdrop").style.display = "flex";
+  }
+
   function makeInput(placeholder, value = "", type = "text") {
     const input = document.createElement("input");
     input.type = type;
     input.placeholder = placeholder;
     input.value = value;
     input.className = "modal-input";
-    input.autocomplete = "off";
     return input;
   }
 
   function openMoneyModal(kind) {
     if (kind === "deposit") {
-      const input = makeInput("Сумма в рублях, минимум 150", "150", "number");
+      const input = makeInput("Сумма в рублях (от 150)", "150", "number");
 
-      openModal("Пополнение баланса", input, [{
+      openModal("Пополнение", input, [{
         label: "ПРОДОЛЖИТЬ",
         onClick: () => {
-          const amount = Number(input.value);
-
-          if (!Number.isFinite(amount) || amount < 150) {
-            toast("Минимальная сумма пополнения — 150 ₽");
-            return;
-          }
-
+          if (Number(input.value) < 150) return notify("Минимум 150 ₽");
           closeModal();
-          toast("Реальные платежи не подключены. Деньги не списаны.");
+          notify("Реальные платежи ещё не подключены");
         }
       }]);
       return;
     }
 
-    const info = document.createElement("div");
-    const p = document.createElement("p");
-    p.textContent = "Доступно: " + fmt(user.balance) + " монет (" + money(user.balance) + ").";
-    info.appendChild(p);
-
-    const calc = document.createElement("p");
-    calc.textContent = "Курс: 1 000 монет = 0,90 ₽. Минимум: 1 000 000 монет.";
-    info.appendChild(calc);
-
-    openModal("Вывод средств", info, [{
-      label: "СОЗДАТЬ ЗАЯВКУ",
-      onClick: () => {
-        if (user.balance < 1000000) {
-          toast("Минимальный вывод — 1 000 000 монет");
-          return;
-        }
-
-        closeModal();
-        toast("Фактический вывод не подключён. Баланс не списан.");
-      }
-    }]);
+    openModal(
+      "Вывод средств",
+      `Баланс: ${formatNumber(user.balance)} монет. Минимум для вывода — 1 000 000 монет. Реальные выплаты не подключены, баланс не будет списан.`,
+      [{ label: "ЗАКРЫТЬ", onClick: closeModal }]
+    );
   }
 
   function openSubscription() {
-    openModal("Подписка", "Покупка подписки через Telegram Stars пока не подключена.", [
+    openModal("Подписка", "Покупка подписки пока не подключена.", [
       { label: "ПОНЯТНО", onClick: closeModal }
     ]);
   }
@@ -774,129 +684,92 @@
           const value = input.value.trim();
 
           if (value.length < 2 || value.length > 20) {
-            toast("Никнейм должен быть от 2 до 20 символов");
-            return;
+            return notify("Ник должен содержать от 2 до 20 символов");
           }
 
           user.nickname = value;
-          save();
+          saveUser();
           updateBalance();
           closeModal();
-          toast("Никнейм изменён");
+          notify("Никнейм сохранён");
         }
       }]);
       return;
     }
 
     if (type === "color") {
-      const colors = [
+      const box = document.createElement("div");
+
+      [
         ["Белый", "#ffffff"],
         ["Золотой", "#ffd45a"],
         ["Фиолетовый", "#b58cff"],
         ["Красный", "#ff667d"],
         ["Зелёный", "#68e6a0"]
-      ];
-
-      const box = document.createElement("div");
-      box.className = "color-options";
-
-      colors.forEach(([label, color]) => {
+      ].forEach(([label, color]) => {
         const button = document.createElement("button");
         button.type = "button";
         button.textContent = label;
         button.style.color = color;
+
         button.addEventListener("click", () => {
           user.nicknameColor = color;
-          save();
+          saveUser();
           updateBalance();
           closeModal();
-          toast("Цвет никнейма изменён");
         });
+
         box.appendChild(button);
       });
 
-      openModal("Цвет никнейма", box);
+      openModal("Цвет ника", box);
       return;
     }
 
     if (type === "promo") {
-      const input = makeInput("Введи промокод");
+      const input = makeInput("Введите промокод");
 
-      const activate = () => {
-        const code = input.value.trim().toLowerCase();
-
-        if (code !== PROMO) {
-          toast("Промокод не найден");
-          return;
-        }
-
-        if (user.promoUsed) {
-          toast("Промокод уже активирован в этом профиле");
-          return;
-        }
-
-        user.balance += 100000000;
-        user.promoUsed = true;
-        user.usedPromos.push(PROMO);
-        save();
-        updateBalance();
-        closeModal();
-        toast("+100 000 000 монет");
-      };
-
-      const create = () => {
-        const field = makeInput("Новый код (4–24 символа)");
-
-        openModal("Создание промокода", field, [{
-          label: "СОЗДАТЬ",
-          onClick: () => {
-            const code = field.value.trim().toLowerCase();
-
-            if (!/^[a-z0-9_-]{4,24}$/.test(code)) {
-              toast("Используй 4–24 латинских символа, цифры, _ или -");
-              return;
-            }
-
-            user.createdPromos.push(code);
-            save();
-            closeModal();
-            toast("Код сохранён локально. Для активации другими пользователями нужен сервер.");
+      openModal("Промокоды", input, [{
+        label: "АКТИВИРОВАТЬ",
+        onClick: () => {
+          if (input.value.trim().toLowerCase() !== PROMO_CODE) {
+            return notify("Промокод не найден");
           }
-        }]);
-      };
 
-      openModal("Промокоды", input, [
-        { label: "АКТИВИРОВАТЬ", onClick: activate },
-        { label: "СОЗДАТЬ КОД", className: "secondary-action", onClick: create }
-      ]);
+          if (user.promoUsed) {
+            return notify("В этой версии код можно активировать один раз");
+          }
+
+          user.balance += 100000000;
+          user.promoUsed = true;
+          saveUser();
+          updateBalance();
+          closeModal();
+          notify("Начислено 100 000 000 монет");
+        }
+      }]);
       return;
     }
 
     if (type === "referrals") {
-      const link = "Реферальные начисления требуют серверной проверки приглашений. Эта версия не начисляет бонусы за переход по ссылке.";
-
-      openModal("Реферальная система", link, [
-        { label: "ПОНЯТНО", onClick: closeModal }
-      ]);
+      openModal(
+        "Реферальная система",
+        "Для безопасного начисления бонусов необходим сервер, который проверяет приглашения.",
+        [{ label: "ЗАКРЫТЬ", onClick: closeModal }]
+      );
       return;
     }
 
     if (type === "transfer") {
       const recipient = makeInput("Никнейм получателя");
-      const amount = makeInput("Количество монет", "1000", "number");
-
+      const amount = makeInput("Сумма", "1000", "number");
       const box = document.createElement("div");
       box.append(recipient, amount);
 
       openModal("Перевод монет", box, [{
         label: "ПЕРЕВЕСТИ",
         onClick: () => {
-          if (!recipient.value.trim() || Number(amount.value) < 1) {
-            toast("Укажи получателя и сумму");
-            return;
-          }
-
-          toast("Переводы другим пользователям требуют серверной проверки. Монеты не списаны.");
+          notify("Переводы пока не подключены. Монеты не списаны.");
           closeModal();
         }
       }]);
@@ -906,7 +779,7 @@
     if (type === "agreement") {
       openModal(
         "Пользовательское соглашение",
-        "Эта версия содержит демонстрационные игровые механики. Баланс хранится в браузере и не защищён от изменения. Реальные платежи, выплаты и переводы не подключены. Не отправляй деньги на основании отображаемого баланса. Перед запуском денежных игр необходимо проверить законодательство и правила платформы.",
+        "Игровые механики демонстрационные. Баланс хранится в браузере, не является защищённым серверным счётом. Реальные платежи и выплаты не подключены.",
         [{ label: "ЗАКРЫТЬ", onClick: closeModal }]
       );
     }
@@ -917,64 +790,103 @@
   }
 
   function renderLeaderboard() {
-    const list = $("leaderboardList");
-    if (!list) return;
+    if ($("topFirstName")) $("topFirstName").textContent = user.nickname;
+    if ($("topFirstWon")) $("topFirstWon").textContent = formatNumber(user.totalWon);
+    if ($("topSecondName")) $("topSecondName").textContent = "Пока нет данных";
+    if ($("topSecondWon")) $("topSecondWon").textContent = "0";
+    if ($("topThirdName")) $("topThirdName").textContent = "Пока нет данных";
+    if ($("topThirdWon")) $("topThirdWon").textContent = "0";
 
-    list.replaceChildren();
-
-    const empty = document.createElement("div");
-    empty.className = "history-empty";
-    empty.textContent = "Общий рейтинг появится после подключения серверной базы данных.";
-    list.appendChild(empty);
-
-    const firstName = $("topFirstName");
-    const firstWon = $("topFirstWon");
-    if (firstName) firstName.textContent = user.nickname + " (этот браузер)";
-    if (firstWon) firstWon.textContent = fmt(user.totalWon);
-
-    const secondName = $("topSecondName");
-    const secondWon = $("topSecondWon");
-    const thirdName = $("topThirdName");
-    const thirdWon = $("topThirdWon");
-
-    if (secondName) secondName.textContent = "Пока нет данных";
-    if (secondWon) secondWon.textContent = "0";
-    if (thirdName) thirdName.textContent = "Пока нет данных";
-    if (thirdWon) thirdWon.textContent = "0";
-  }
-
-  function showLoading(text = "Загрузка игрового зала") {
-    const overlay = $("loadingOverlay");
-    const caption = $("loadingText");
-
-    if (caption) caption.textContent = text;
-    if (overlay) {
-      overlay.classList.add("show");
-      overlay.style.display = "flex";
-
-      setTimeout(() => {
-        overlay.classList.remove("show");
-        overlay.style.display = "";
-      }, 500);
+    if ($("leaderboardList")) {
+      $("leaderboardList").textContent =
+        "Общий рейтинг появится после подключения серверной базы.";
     }
   }
 
-  function bindKeyboardAndInput() {
-    const input = $("betAmount");
-    if (input) {
-      input.addEventListener("input", () => {
-        const value = Number(input.value);
-        if (Number.isFinite(value) && value > 0) {
-          bet = Math.floor(value);
-          const potential = $("potentialWin");
-          if (potential) potential.textContent =
-            fmt(bet * (selectedBet?.multiplier || 12));
+  // ПРИВЯЗКА ВСЕХ КНОПОК
+  function bindButtons() {
+    // Дублируем onclick-функции, чтобы они работали и после обновления JS.
+    window.navigateTo = navigateTo;
+    window.openGame = openGame;
+    window.changeBet = changeBet;
+    window.setBet = setBet;
+    window.placeBet = placeBet;
+    window.openMoneyModal = openMoneyModal;
+    window.openSubscription = openSubscription;
+    window.openUtility = openUtility;
+    window.closeModal = closeModal;
+    window.closeModalFromBackdrop = closeModalFromBackdrop;
+    window.closeResult = closeResult;
+
+    // Навигация внизу.
+    document.querySelectorAll(".nav-item").forEach(button => {
+      button.addEventListener("click", event => {
+        event.preventDefault();
+        const screenId = button.dataset.screen;
+        if (screenId) navigateTo(screenId);
+      });
+    });
+
+    // Кнопки назад и главная кнопка игры.
+    document.querySelectorAll(".back-button").forEach(button => {
+      button.addEventListener("click", event => {
+        event.preventDefault();
+
+        const parent = button.closest(".screen");
+        if (parent?.id === "gameScreen") {
+          navigateTo("gamesScreen");
+        } else {
+          navigateTo("homeScreen");
         }
       });
+    });
 
-      input.addEventListener("keydown", event => {
-        if (event.key === "Enter") placeBet();
+    const playMain = document.querySelector(".play-main");
+    if (playMain) {
+      playMain.addEventListener("click", event => {
+        event.preventDefault();
+        navigateTo("gamesScreen");
       });
+    }
+
+    // Карточки игр.
+    document.querySelectorAll(".game-card, .mode-row").forEach(button => {
+      button.addEventListener("click", event => {
+        event.preventDefault();
+
+        const inline = button.getAttribute("onclick") || "";
+        const match = inline.match(/openGame\(['"]([^'"]+)['"]\)/);
+        if (match) openGame(match[1]);
+      });
+    });
+
+    // Открытие профиля, топа, раздела «Ещё» через любые элементы меню.
+    document.querySelectorAll("[onclick]").forEach(element => {
+      const code = element.getAttribute("onclick") || "";
+
+      if (code.includes("navigateTo(")) {
+        const match = code.match(/navigateTo\(['"]([^'"]+)['"]\)/);
+        if (match) {
+          element.addEventListener("click", event => {
+            event.preventDefault();
+            navigateTo(match[1]);
+          });
+        }
+      }
+    });
+
+    if ($("betAmount")) {
+      $("betAmount").addEventListener("input", () => {
+        const value = Number($("betAmount").value);
+        if (Number.isFinite(value) && value > 0) {
+          currentBet = Math.floor(value);
+          updatePotentialWin();
+        }
+      });
+    }
+
+    if ($("modalBackdrop")) {
+      $("modalBackdrop").addEventListener("click", closeModalFromBackdrop);
     }
 
     document.addEventListener("keydown", event => {
@@ -989,56 +901,36 @@
     try {
       const tg = window.Telegram?.WebApp;
       if (!tg) return;
+
       tg.ready();
       tg.expand();
 
       if (tg.setHeaderColor) tg.setHeaderColor("#130824");
       if (tg.setBackgroundColor) tg.setBackgroundColor("#130824");
-    } catch (e) {
-      console.warn("Telegram WebApp API:", e);
+    } catch (error) {
+      console.warn("Telegram WebApp:", error);
     }
   }
 
   function init() {
     user = loadUser();
 
-    // Поддержка встроенных onclick в index.html.
-    window.navigateTo = navigateTo;
-    window.openGame = openGame;
-    window.changeBet = changeBet;
-    window.setBet = setBet;
-    window.placeBet = placeBet;
-    window.openMoneyModal = openMoneyModal;
-    window.openSubscription = openSubscription;
-    window.openUtility = openUtility;
-    window.closeModal = closeModal;
-    window.closeModalFromBackdrop = closeModalFromBackdrop;
-    window.closeResult = closeResult;
+    bindButtons();
+    initTelegram();
 
-    // Делаем кнопки и разделы доступными для клика.
-    document.querySelectorAll("button").forEach(button => {
-      if (!button.hasAttribute("type") && button.closest("form")) {
-        button.type = "button";
+    SCREENS.forEach(id => {
+      if ($(id)) {
+        const active = id === "homeScreen";
+        $(id).classList.toggle("active", active);
+        $(id).hidden = !active;
       }
     });
 
-    document.querySelectorAll(".screen").forEach(screen => {
-      const active = screen.id === "homeScreen";
-      screen.classList.toggle("active", active);
-      screen.hidden = !active;
-    });
-
-    document.querySelectorAll(".nav-item").forEach(button => {
-      button.classList.toggle("active", button.dataset.screen === "homeScreen");
-    });
-
-    bindKeyboardAndInput();
-    initTelegram();
-    updateBalance();
     renderBetOptions();
     renderLeaderboard();
+    updateBalance();
 
-    console.log("Dice Casino готов. Все основные обработчики подключены.");
+    console.log("Dice Casino app.js успешно запущен");
   }
 
   if (document.readyState === "loading") {
