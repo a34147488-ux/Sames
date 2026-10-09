@@ -4,7 +4,6 @@
 <head>
 
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>World Coin Market</title>
@@ -18,97 +17,101 @@
 
 <body>
 
-
 <div class="background"></div>
-
 
 
 <div class="container">
 
 
-    <div class="brand">
+<div class="brand">
 
-        <div class="logo">
-            WORLD COIN
-        </div>
+<div class="logo">
+WORLD COIN
+</div>
 
-        <div class="market">
-            MARKET
-        </div>
+<div class="market">
+MARKET
+</div>
 
-    </div>
-
-
-
-
-    <div class="main-buttons">
-
-
-        <button 
-        class="glass-button"
-        onclick="openBuy()">
-
-            КУПИТЬ
-
-        </button>
+</div>
 
 
 
-        <button 
-        class="glass-button"
-        onclick="openSell()">
+<div class="main-buttons">
 
-            ПРОДАТЬ
+<button class="glass-button" onclick="openBuy()">
+КУПИТЬ
+</button>
 
-        </button>
+<button class="glass-button" onclick="openSell()">
+ПРОДАТЬ
+</button>
 
-
-    </div>
+</div>
 
 
 
 
+<div class="course-box glass">
 
-    <div class="course-box glass">
-
-
-        <div class="course-title">
-            ТЕКУЩИЙ КУРС
-        </div>
+<div class="course-title">
+ТЕКУЩИЙ КУРС
+</div>
 
 
+<div class="course-row">
 
-        <div class="course-row">
+<span>
+Покупка
+</span>
 
-            <span>
-                Покупка
-            </span>
+<strong>
+1 000 000 = 10.60 ₽
+</strong>
 
-            <strong>
-                1 000 000 = 10.60 ₽
-            </strong>
-
-        </div>
-
+</div>
 
 
-        <div class="course-row">
+<div class="course-row">
 
-            <span>
-                Продажа
-            </span>
+<span>
+Продажа
+</span>
 
-            <strong>
-                1 000 000 = 9.00 ₽
-            </strong>
+<strong>
+1 000 000 = 9.00 ₽
+</strong>
 
-        </div>
-
-
-
-    </div>
+</div>
 
 
+</div>
+
+
+
+
+<div class="limit-box glass">
+
+
+<div>
+Не покупай свыше:
+</div>
+
+<strong>
+200кк
+</strong>
+
+
+<div>
+Не продавай свыше:
+</div>
+
+<strong>
+200кк
+</strong>
+
+
+</div>
 
 </div>
 
@@ -119,79 +122,81 @@
 <div class="modal" id="modal">
 
 
-    <div class="modal-card glass">
+<div class="modal-card glass">
 
 
-        <h2 id="modalTitle">
-            Купить World Coin
-        </h2>
-
-
-
-        <input
-
-        id="coinInput"
-
-        type="number"
-
-        placeholder="Введите количество коинов"
-
-        oninput="calculate()"
-
-        >
+<h2 id="modalTitle">
+Купить World Coin
+</h2>
 
 
 
+<input
 
-        <div class="calculate-box">
+id="coinInput"
 
-            <span>
-                Сумма:
-            </span>
+type="number"
 
+placeholder="Количество коинов"
 
-            <strong id="rubResult">
-                0.00 ₽
-            </strong>
+oninput="calculateFromCoins()"
 
-        </div>
+>
 
 
 
 
+<input
 
-        <button
+id="rubInput"
 
-        id="mainAction"
+type="number"
 
-        class="action-button">
+placeholder="Сумма в рублях"
 
-            Продолжить
+oninput="calculateFromRub()"
 
-        </button>
-
-
-
-
-
-        <button
-
-        class="close-button"
-
-        onclick="closeModal()">
-
-            Закрыть
-
-        </button>
+>
 
 
 
-    </div>
 
+<div class="calculate-box">
+
+
+<span>
+Итого:
+</span>
+
+
+<strong id="rubResult">
+0.00 ₽
+</strong>
 
 
 </div>
 
+
+
+<button id="mainAction" class="action-button">
+
+Продолжить
+
+</button>
+
+
+
+<button class="close-button" onclick="closeModal()">
+
+Закрыть
+
+</button>
+
+
+</div>
+
+
+</div>
 
 
 
