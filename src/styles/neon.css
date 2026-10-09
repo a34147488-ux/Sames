@@ -1,0 +1,560 @@
+* {
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+
+body {
+  margin:0;
+  overflow:hidden;
+  background:#05010d;
+}
+
+
+.app {
+  height:100vh;
+  width:100%;
+  color:white;
+  position:relative;
+  overflow:hidden;
+  background:
+  radial-gradient(circle at top,#3a0ca3,#05010d 60%);
+}
+
+
+
+/* фоновые частицы */
+
+.background-particles span {
+
+  position:absolute;
+  width:8px;
+  height:8px;
+
+  background:#00eaff;
+
+  border-radius:50%;
+
+  box-shadow:
+  0 0 20px #00eaff,
+  0 0 40px #00eaff;
+
+  animation:float 8s infinite;
+
+}
+
+
+.background-particles span:nth-child(1){
+left:15%;
+top:20%;
+}
+
+.background-particles span:nth-child(2){
+left:80%;
+top:30%;
+animation-delay:2s;
+}
+
+.background-particles span:nth-child(3){
+left:50%;
+top:70%;
+animation-delay:4s;
+}
+
+.background-particles span:nth-child(4){
+left:30%;
+top:80%;
+animation-delay:6s;
+}
+
+
+
+@keyframes float {
+
+0%{
+transform:translateY(0);
+opacity:.3;
+}
+
+50%{
+transform:translateY(-80px);
+opacity:1;
+}
+
+100%{
+transform:translateY(0);
+opacity:.3;
+}
+
+}
+
+
+
+/* Контент */
+
+.content {
+
+height:calc(100vh - 100px);
+
+padding:25px;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+}
+
+
+
+/* Баланс */
+
+
+.balance-box {
+
+width:100%;
+max-width:380px;
+
+height:190px;
+
+border-radius:25px;
+
+position:relative;
+
+overflow:hidden;
+
+background:
+rgba(255,255,255,.05);
+
+border:2px solid #00eaff;
+
+box-shadow:
+
+0 0 20px #00eaff,
+inset 0 0 30px rgba(0,234,255,.2);
+
+
+text-align:center;
+
+padding-top:35px;
+
+}
+
+
+
+.balance-title {
+
+font-size:14px;
+
+letter-spacing:4px;
+
+opacity:.7;
+
+}
+
+
+
+.balance {
+
+margin-top:15px;
+
+font-size:42px;
+
+font-weight:bold;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+gap:12px;
+
+}
+
+
+
+.small-coin {
+
+width:25px;
+
+height:25px;
+
+border-radius:50%;
+
+background:#ffd700;
+
+box-shadow:
+
+0 0 15px gold;
+
+animation:spin 3s linear infinite;
+
+}
+
+
+@keyframes spin {
+
+from{
+transform:rotateY(0);
+}
+
+to{
+transform:rotateY(360deg);
+}
+
+}
+
+
+
+/* плавающие элементы */
+
+
+.floating {
+
+position:absolute;
+
+opacity:.8;
+
+}
+
+
+
+.coin {
+
+width:18px;
+height:18px;
+
+border-radius:50%;
+
+background:#ffd700;
+
+box-shadow:
+
+0 0 15px gold;
+
+}
+
+
+
+.one {
+
+top:20px;
+left:40px;
+
+animation:move 5s infinite;
+
+}
+
+
+.two {
+
+right:50px;
+bottom:35px;
+
+animation:move 7s infinite;
+
+}
+
+
+
+.diamond {
+
+width:15px;
+height:15px;
+
+background:#00ffff;
+
+transform:rotate(45deg);
+
+top:80px;
+right:100px;
+
+box-shadow:
+0 0 20px cyan;
+
+}
+
+
+
+@keyframes move {
+
+50%{
+transform:translateY(-25px);
+}
+
+}
+
+
+
+/* кнопки */
+
+
+.neon-button {
+
+width:100%;
+
+max-width:380px;
+
+height:60px;
+
+margin-top:15px;
+
+border-radius:18px;
+
+background:
+
+rgba(255,255,255,.06);
+
+border:
+
+2px solid #8a2be2;
+
+color:white;
+
+font-size:17px;
+
+box-shadow:
+
+0 0 15px #8a2be2;
+
+transition:.3s;
+
+}
+
+
+
+.neon-button:hover {
+
+transform:scale(1.03);
+
+box-shadow:
+
+0 0 30px #8a2be2;
+
+}
+
+
+
+.gold {
+
+border-color:#ffd700;
+
+box-shadow:
+
+0 0 25px gold;
+
+animation:goldGlow 2s infinite;
+
+}
+
+
+
+@keyframes goldGlow {
+
+50%{
+
+box-shadow:
+
+0 0 45px gold;
+
+}
+
+}
+
+
+
+.withdraw {
+
+border-color:#00ff99;
+
+box-shadow:
+
+0 0 20px #00ff99;
+
+}
+
+
+
+/* нижнее меню */
+
+
+.bottom-menu {
+
+position:absolute;
+
+bottom:0;
+
+left:0;
+
+width:100%;
+
+height:95px;
+
+background:
+
+rgba(15,15,25,.8);
+
+backdrop-filter:blur(15px);
+
+border-radius:35px 35px 0 0;
+
+border-top:1px solid rgba(255,255,255,.1);
+
+display:flex;
+
+justify-content:space-around;
+
+align-items:center;
+
+}
+
+
+
+.bottom-menu button {
+
+width:65px;
+
+height:65px;
+
+border:none;
+
+background:none;
+
+position:relative;
+
+transition:.3s;
+
+}
+
+
+
+.bottom-menu button.active {
+
+transform:
+
+translateY(-22px)
+scale(1.15);
+
+}
+
+
+
+.bottom-menu button.active::before {
+
+content:"";
+
+position:absolute;
+
+inset:0;
+
+border-radius:50%;
+
+background:
+
+#00eaff;
+
+box-shadow:
+
+0 0 30px #00eaff;
+
+z-index:-1;
+
+}
+
+
+
+/* иконки */
+
+.icon {
+
+width:32px;
+
+height:32px;
+
+margin:auto;
+
+border:3px solid white;
+
+opacity:.8;
+
+}
+
+
+/* дом */
+
+.home-icon {
+
+border-radius:8px;
+
+}
+
+
+
+/* игры */
+
+.game-icon {
+
+border-radius:12px;
+
+}
+
+
+
+/* корона */
+
+.crown-icon {
+
+border-radius:5px;
+
+border-color:gold;
+
+}
+
+
+
+/* меню */
+
+.menu-icon {
+
+border:none;
+
+border-top:3px solid white;
+
+border-bottom:3px solid white;
+
+height:20px;
+
+}
+
+
+
+/* страницы */
+
+
+.page {
+
+width:100%;
+
+text-align:center;
+
+}
+
+
+
+.card {
+
+margin:15px;
+
+padding:20px;
+
+border-radius:20px;
+
+border:1px solid #00eaff;
+
+box-shadow:0 0 20px #00eaff;
+
+background:rgba(255,255,255,.05);
+
+}
