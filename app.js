@@ -3,25 +3,31 @@ let mode = "buy";
 
 const modal = document.getElementById("modal");
 const modalTitle = document.getElementById("modalTitle");
+
 const coinInput = document.getElementById("coinInput");
+const rubInput = document.getElementById("rubInput");
+
 const rubResult = document.getElementById("rubResult");
+
 const mainAction = document.getElementById("mainAction");
 
 
 
 function openBuy(){
 
-    mode = "buy";
+mode="buy";
 
-    modalTitle.innerText = "Купить World Coin";
+modalTitle.innerText="Купить World Coin";
 
-    mainAction.innerText = "Перейти к оплате";
+mainAction.innerText="Перейти к оплате";
 
-    coinInput.value = "";
+coinInput.value="";
 
-    rubResult.innerText = "0.00 ₽";
+rubInput.value="";
 
-    modal.style.display = "flex";
+rubResult.innerText="0.00 ₽";
+
+modal.style.display="flex";
 
 }
 
@@ -29,17 +35,19 @@ function openBuy(){
 
 function openSell(){
 
-    mode = "sell";
+mode="sell";
 
-    modalTitle.innerText = "Продать World Coin";
+modalTitle.innerText="Продать World Coin";
 
-    mainAction.innerText = "Получить ссылку";
+mainAction.innerText="Получить ссылку";
 
-    coinInput.value = "";
+coinInput.value="";
 
-    rubResult.innerText = "0.00 ₽";
+rubInput.value="";
 
-    modal.style.display = "flex";
+rubResult.innerText="0.00 ₽";
+
+modal.style.display="flex";
 
 }
 
@@ -47,36 +55,54 @@ function openSell(){
 
 function closeModal(){
 
-    modal.style.display = "none";
+modal.style.display="none";
 
 }
 
 
 
 
-function calculate(){
+function calculateFromCoins(){
 
-    let coins = Number(coinInput.value);
-
-
-    if(!coins || coins <= 0){
-
-        rubResult.innerText = "0.00 ₽";
-
-        return;
-
-    }
+let coins=Number(coinInput.value);
 
 
-
-    let rate = mode === "buy" ? 10.60 : 9.00;
-
+if(!coins)return;
 
 
-    let rub = (coins / 1000000) * rate;
+let rate = mode==="buy" ? 10.60 : 9.00;
 
 
-    rubResult.innerText = rub.toFixed(2) + " ₽";
+let rub=(coins/1000000)*rate;
+
+
+rubInput.value=rub.toFixed(2);
+
+rubResult.innerText=rub.toFixed(2)+" ₽";
+
+}
+
+
+
+
+function calculateFromRub(){
+
+let rub=Number(rubInput.value);
+
+
+if(!rub)return;
+
+
+let rate = mode==="buy" ? 10.60 : 9.00;
+
+
+let coins=(rub/rate)*1000000;
+
+
+coinInput.value=Math.floor(coins);
+
+
+rubResult.innerText=rub.toFixed(2)+" ₽";
 
 }
 
@@ -85,122 +111,12 @@ function calculate(){
 
 
 
-mainAction.onclick = async function(){
+mainAction.onclick=async()=>{
 
 
-    let coins = Number(coinInput.value);
-
-
-
-    if(!coins || coins <= 0){
-
-        alert("Введите количество коинов");
-
-        return;
-
-    }
-
-
-
-
-    if(mode === "buy"){
-
-
-        // создаём сумму платежа
-
-        let rub = (coins / 1000000) * 10.60;
-
-
-
-        try {
-
-
-            const response = await fetch("/create-payment", {
-
-
-                method:"POST",
-
-
-                headers:{
-
-
-                    "Content-Type":"application/json"
-
-
-                },
-
-
-                body:JSON.stringify({
-
-
-                    amount: rub.toFixed(2),
-
-
-                    code: Date.now()
-
-
-                })
-
-
-            });
-
-
-
-            const data = await response.json();
-
-
-
-            if(data.success){
-
-
-                window.open(
-                    data.link,
-                    "_blank"
-                );
-
-
-            } else {
-
-
-                alert(
-                    "Ошибка создания оплаты"
-                );
-
-
-            }
-
-
-
-        } catch(e){
-
-
-            alert(
-                "Ошибка соединения с сервером"
-            );
-
-
-        }
-
-
-
-    }
-
-
-
-
-
-
-    else {
-
-
-
-        alert(
-            "Здесь добавим ссылку для передачи коинов"
-        );
-
-
-    }
-
+alert(
+"Подключение оплаты добавим следующим этапом"
+);
 
 
 };
@@ -209,15 +125,10 @@ mainAction.onclick = async function(){
 
 
 
-
-
 if(window.Telegram && Telegram.WebApp){
 
+Telegram.WebApp.ready();
 
-    Telegram.WebApp.ready();
-
-
-    Telegram.WebApp.expand();
-
+Telegram.WebApp.expand();
 
 }
