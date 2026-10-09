@@ -2,82 +2,81 @@ let mode = "buy";
 
 
 const modal = document.getElementById("modal");
-
 const modalTitle = document.getElementById("modalTitle");
-
 const coinInput = document.getElementById("coinInput");
-
 const rubResult = document.getElementById("rubResult");
-
 const mainAction = document.getElementById("mainAction");
-
-
 
 
 
 function openBuy(){
 
-
     mode = "buy";
-
 
     modalTitle.innerText = "Купить World Coin";
 
-
-    mainAction.innerText = "Получить реквизиты";
-
+    mainAction.innerText = "Перейти к оплате";
 
     coinInput.value = "";
 
-
     rubResult.innerText = "0.00 ₽";
-
 
     modal.style.display = "flex";
 
-
 }
-
-
-
-
 
 
 
 function openSell(){
 
-
     mode = "sell";
-
 
     modalTitle.innerText = "Продать World Coin";
 
-
     mainAction.innerText = "Получить ссылку";
-
 
     coinInput.value = "";
 
-
     rubResult.innerText = "0.00 ₽";
-
 
     modal.style.display = "flex";
 
-
 }
-
-
-
-
 
 
 
 function closeModal(){
 
-
     modal.style.display = "none";
 
+}
+
+
+
+
+function calculate(){
+
+    let coins = Number(coinInput.value);
+
+
+    if(!coins || coins <= 0){
+
+        rubResult.innerText = "0.00 ₽";
+
+        return;
+
+    }
+
+
+
+    let rate = mode === "buy" ? 10.60 : 9.00;
+
+
+
+    let rub = (coins / 1000000) * rate;
+
+
+    rubResult.innerText = rub.toFixed(2) + " ₽";
 
 }
 
@@ -86,9 +85,7 @@ function closeModal(){
 
 
 
-
-
-function calculate(){
+mainAction.onclick = async function(){
 
 
     let coins = Number(coinInput.value);
@@ -97,77 +94,99 @@ function calculate(){
 
     if(!coins || coins <= 0){
 
-
-        rubResult.innerText = "0.00 ₽";
-
+        alert("Введите количество коинов");
 
         return;
 
-
     }
 
-
-
-    let rate;
 
 
 
     if(mode === "buy"){
 
 
-        rate = 10.60;
+        // создаём сумму платежа
+
+        let rub = (coins / 1000000) * 10.60;
 
 
-    } else {
+
+        try {
 
 
-        rate = 9.00;
+            const response = await fetch("/create-payment", {
+
+
+                method:"POST",
+
+
+                headers:{
+
+
+                    "Content-Type":"application/json"
+
+
+                },
+
+
+                body:JSON.stringify({
+
+
+                    amount: rub.toFixed(2),
+
+
+                    code: Date.now()
+
+
+                })
+
+
+            });
+
+
+
+            const data = await response.json();
+
+
+
+            if(data.success){
+
+
+                window.open(
+                    data.link,
+                    "_blank"
+                );
+
+
+            } else {
+
+
+                alert(
+                    "Ошибка создания оплаты"
+                );
+
+
+            }
+
+
+
+        } catch(e){
+
+
+            alert(
+                "Ошибка соединения с сервером"
+            );
+
+
+        }
+
 
 
     }
 
 
 
-
-    let result = (coins / 1000000) * rate;
-
-
-
-    rubResult.innerText = result.toFixed(2) + " ₽";
-
-
-}
-
-
-
-
-
-
-
-
-mainAction.onclick = function(){
-
-
-
-    if(mode === "buy"){
-
-
-        /*
-        Здесь позже вставим:
-
-        - твои реквизиты
-        - ссылку оплаты
-        - API другого проекта
-
-        */
-
-
-        alert(
-            "Здесь появятся реквизиты для оплаты"
-        );
-
-
-    }
 
 
 
@@ -175,16 +194,8 @@ mainAction.onclick = function(){
 
 
 
-        /*
-        Здесь позже вставим:
-
-        - ссылку на перевод коинов
-
-        */
-
-
         alert(
-            "Здесь появится ссылка для перевода коинов"
+            "Здесь добавим ссылку для передачи коинов"
         );
 
 
@@ -198,9 +209,6 @@ mainAction.onclick = function(){
 
 
 
-
-
-// Telegram Mini App
 
 
 if(window.Telegram && Telegram.WebApp){
