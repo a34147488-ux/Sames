@@ -92,14 +92,16 @@
   }
 
   function getPlayerId() {
-    let id = localStorage.getItem("dice_casino_player_id");
-
-    if (!id) {
-      id = String(Math.floor(100000 + Math.random() * 900000));
-      localStorage.setItem("dice_casino_player_id", id);
+    try {
+      let id = localStorage.getItem("dice_casino_player_id");
+      if (!id) {
+        id = String(Math.floor(100000 + Math.random() * 900000));
+        localStorage.setItem("dice_casino_player_id", id);
+      }
+      return id;
+    } catch (error) {
+      return "DEMO";
     }
-
-    return id;
   }
 
   function updateBalance() {
@@ -323,7 +325,7 @@
 
     setBet(Math.max(1, inputValue + direction * step));
   }
-
+  
   function placeBet() {
     if (busy) return notify("Дождись завершения раунда");
     if (!selectedBet) return notify("Сначала выбери ставку");
@@ -347,6 +349,13 @@
     if (button) {
       button.disabled = true;
       button.textContent = "РАУНД ИДЁТ…";
+    }
+
+    const betOptions = $("betOptions");
+    if (betOptions) {
+      betOptions.querySelectorAll("button").forEach(option => {
+        option.disabled = true;
+      });
     }
 
     user.balance -= amount;
@@ -489,9 +498,17 @@
 
     busy = false;
 
-    if (button = $("placeBetButton")) {
-      button.disabled = false;
-      button.textContent = "СДЕЛАТЬ СТАВКУ";
+    const betButton = $("placeBetButton");
+    if (betButton) {
+      betButton.disabled = false;
+      betButton.textContent = "СДЕЛАТЬ СТАВКУ";
+    }
+
+    const options = $("betOptions");
+    if (options) {
+      options.querySelectorAll("button").forEach(option => {
+        option.disabled = false;
+      });
     }
 
     showResult(net, description);
@@ -519,6 +536,9 @@
     if ($("resultDescription")) {
       $("resultDescription").textContent = description;
     }
+
+    const resultCard = $("resultCard");
+    if (resultCard) resultCard.classList.toggle("loss", net <= 0);
 
     overlay.classList.add("show");
     overlay.style.display = "flex";
@@ -600,8 +620,7 @@
 
     backdrop.classList.remove("show");
     backdrop.style.display = "";
-  }
-
+    
   function closeModalFromBackdrop(event) {
     if (event.target === $("modalBackdrop")) closeModal();
   }
@@ -803,9 +822,8 @@
     }
   }
 
-  // ПРИВЯЗКА ВСЕХ КНОПОК
+  // ПРИВЯЗКА КНОПОК
   function bindButtons() {
-    // Дублируем onclick-функции, чтобы они работали и после обновления JS.
     window.navigateTo = navigateTo;
     window.openGame = openGame;
     window.changeBet = changeBet;
@@ -818,75 +836,15 @@
     window.closeModalFromBackdrop = closeModalFromBackdrop;
     window.closeResult = closeResult;
 
-    // Навигация внизу.
-    document.querySelectorAll(".nav-item").forEach(button => {
-      button.addEventListener("click", event => {
-        event.preventDefault();
-        const screenId = button.dataset.screen;
-        if (screenId) navigateTo(screenId);
-      });
-    });
-
-    // Кнопки назад и главная кнопка игры.
-    document.querySelectorAll(".back-button").forEach(button => {
-      button.addEventListener("click", event => {
-        event.preventDefault();
-
-        const parent = button.closest(".screen");
-        if (parent?.id === "gameScreen") {
-          navigateTo("gamesScreen");
-        } else {
-          navigateTo("homeScreen");
-        }
-      });
-    });
-
-    const playMain = document.querySelector(".play-main");
-    if (playMain) {
-      playMain.addEventListener("click", event => {
-        event.preventDefault();
-        navigateTo("gamesScreen");
-      });
-    }
-
-    // Карточки игр.
-    document.querySelectorAll(".game-card, .mode-row").forEach(button => {
-      button.addEventListener("click", event => {
-        event.preventDefault();
-
-        const inline = button.getAttribute("onclick") || "";
-        const match = inline.match(/openGame\(['"]([^'"]+)['"]\)/);
-        if (match) openGame(match[1]);
-      });
-    });
-
-    // Открытие профиля, топа, раздела «Ещё» через любые элементы меню.
-    document.querySelectorAll("[onclick]").forEach(element => {
-      const code = element.getAttribute("onclick") || "";
-
-      if (code.includes("navigateTo(")) {
-        const match = code.match(/navigateTo\(['"]([^'"]+)['"]\)/);
-        if (match) {
-          element.addEventListener("click", event => {
-            event.preventDefault();
-            navigateTo(match[1]);
-          });
-        }
-      }
-    });
-
-    if ($("betAmount")) {
-      $("betAmount").addEventListener("input", () => {
-        const value = Number($("betAmount").value);
+    const betInput = $("betAmount");
+    if (betInput) {
+      betInput.addEventListener("input", () => {
+        const value = Number(betInput.value);
         if (Number.isFinite(value) && value > 0) {
           currentBet = Math.floor(value);
           updatePotentialWin();
         }
       });
-    }
-
-    if ($("modalBackdrop")) {
-      $("modalBackdrop").addEventListener("click", closeModalFromBackdrop);
     }
 
     document.addEventListener("keydown", event => {
@@ -939,4 +897,3 @@
     init();
   }
 })();
-
