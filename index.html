@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>World Coin Market</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+</head>
+
+
+<body>
+
+
+<div class="background"></div>
+
+
+
+<div class="container">
+
+
+    <div class="brand">
+
+        <div class="logo">
+            WORLD COIN
+        </div>
+
+        <div class="market">
+            MARKET
+        </div>
+
+    </div>
+
+
+
+
+    <div class="main-buttons">
+
+
+        <button 
+        class="glass-button"
+        onclick="openBuy()">
+
+            КУПИТЬ
+
+        </button>
+
+
+
+        <button 
+        class="glass-button"
+        onclick="openSell()">
+
+            ПРОДАТЬ
+
+        </button>
+
+
+    </div>
+
+
+
+
+
+    <div class="course-box glass">
+
+
+        <div class="course-title">
+            ТЕКУЩИЙ КУРС
+        </div>
+
+
+
+        <div class="course-row">
+
+            <span>
+                Покупка
+            </span>
+
+            <strong>
+                1 000 000 = 10.60 ₽
+            </strong>
+
+        </div>
+
+
+
+        <div class="course-row">
+
+            <span>
+                Продажа
+            </span>
+
+            <strong>
+                1 000 000 = 9.00 ₽
+            </strong>
+
+        </div>
+
+
+
+    </div>
+
+
+
+</div>
+
+
+
+
+
+<div class="modal" id="modal">
+
+
+    <div class="modal-card glass">
+
+
+        <h2 id="modalTitle">
+            Купить World Coin
+        </h2>
+
+
+
+        <input
+
+        id="coinInput"
+
+        type="number"
+
+        placeholder="Введите количество коинов"
+
+        oninput="calculate()"
+
+        >
+
+
+
+
+        <div class="calculate-box">
+
+            <span>
+                Сумма:
+            </span>
+
+
+            <strong id="rubResult">
+                0.00 ₽
+            </strong>
+
+        </div>
+
+
+
+
+
+        <button
+
+        id="mainAction"
+
+        class="action-button">
+
+            Продолжить
+
+        </button>
+
+
+
+
+
+        <button
+
+        class="close-button"
+
+        onclick="closeModal()">
+
+            Закрыть
+
+        </button>
+
+
+
+    </div>
+
+
+
+</div>
+
+
+
+
+
+<script src="app.js"></script>
+
+
+</body>
+
+</html>
