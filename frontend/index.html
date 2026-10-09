@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -10,27 +11,36 @@
 
 </head>
 
+
 <body>
 
+
 <div class="background-dice">
-    <div class="dice">◆</div>
-    <div class="dice">◆</div>
-    <div class="dice">◆</div>
-    <div class="dice">◆</div>
+
+<div class="dice"></div>
+<div class="dice"></div>
+<div class="dice"></div>
+<div class="dice"></div>
+
 </div>
+
 
 
 <div class="app">
 
 
 <header class="top">
-    <h1>DICE CASINO</h1>
+
+<h1>DICE CASINO</h1>
+
 </header>
 
 
 
-<section id="games" class="page active">
 
+<!-- ИГРЫ -->
+
+<section id="games" class="page active">
 
 <h2>Игры</h2>
 
@@ -39,48 +49,97 @@
 
 
 <div class="game-card">
-    <img src="assets/covers/wheel.png">
-    <h3>Wheel Dice</h3>
-    <button>Играть</button>
+
+<div class="game-image">
+DICE
 </div>
 
+<h3>Wheel Dice</h3>
 
-<div class="game-card">
-    <img src="assets/covers/dicewheel.png">
-    <h3>Dice Wheel</h3>
-    <button>Играть</button>
-</div>
+<button>
+Играть
+</button>
 
-
-
-<div class="game-card">
-    <img src="assets/covers/doghouse.png">
-    <h3>DogHouse Dice</h3>
-    <button>Играть</button>
 </div>
 
 
 
 <div class="game-card">
-    <img src="assets/covers/olympus.png">
-    <h3>Olympus Dice</h3>
-    <button>Играть</button>
+
+<div class="game-image">
+DICE
+</div>
+
+<h3>Dice Wheel</h3>
+
+<button>
+Играть
+</button>
+
 </div>
 
 
 
 <div class="game-card">
-    <img src="assets/covers/double.png">
-    <h3>Double Dice</h3>
-    <button>Играть</button>
+
+<div class="game-image">
+DICE
+</div>
+
+<h3>DogHouse Dice</h3>
+
+<button>
+Играть
+</button>
+
 </div>
 
 
 
 <div class="game-card">
-    <img src="assets/covers/bananza.png">
-    <h3>Bananza Dice</h3>
-    <button>Играть</button>
+
+<div class="game-image">
+DICE
+</div>
+
+<h3>Olympus Dice</h3>
+
+<button>
+Играть
+</button>
+
+</div>
+
+
+
+<div class="game-card">
+
+<div class="game-image">
+DICE
+</div>
+
+<h3>Double Dice</h3>
+
+<button>
+Играть
+</button>
+
+</div>
+
+
+
+<div class="game-card">
+
+<div class="game-image">
+DICE
+</div>
+
+<h3>Bananza Dice</h3>
+
+<button>
+Играть
+</button>
+
 </div>
 
 
@@ -93,62 +152,7 @@
 
 
 
-<section id="top" class="page">
-
-
-<h2>Топ игроков</h2>
-
-
-<div class="leader">
-
-<div>
-1
-</div>
-
-<p>
-Игрок
-<br>
-5 000 000
-</p>
-
-</div>
-
-
-<div class="leader">
-
-<div>
-2
-</div>
-
-<p>
-Игрок
-<br>
-2 500 000
-</p>
-
-</div>
-
-
-<div class="leader">
-
-<div>
-3
-</div>
-
-<p>
-Игрок
-<br>
-1 000 000
-</p>
-
-</div>
-
-
-
-</section>
-
-
-
+<!-- ЕЩЁ -->
 
 
 <section id="more" class="page">
@@ -175,27 +179,36 @@
 
 
 
+
+<!-- ПРОФИЛЬ -->
+
+
 <section id="profile" class="page">
 
 
 <h2>Профиль</h2>
 
 
+
 <div class="balance-box">
 
 
-<div class="floating-dice"></div>
+<div class="cube-animation"></div>
 
 
-<h3>Баланс</h3>
+<h3>
+Баланс
+</h3>
 
 
-<p id="balance">
+<p>
 0
 </p>
 
 
+
 </div>
+
 
 
 
@@ -204,9 +217,11 @@
 </button>
 
 
+
 <button class="purple-btn">
 Вывести
 </button>
+
 
 
 <button class="purple-btn">
@@ -214,9 +229,11 @@
 </button>
 
 
+
 <button class="purple-btn">
 Цвет ника
 </button>
+
 
 
 
@@ -227,6 +244,78 @@
 
 
 
+
+<!-- ТОП -->
+
+
+<section id="top" class="page">
+
+
+<h2>
+Топ игроков
+</h2>
+
+
+
+<div class="leader">
+
+<span>
+1
+</span>
+
+<p>
+Игрок
+<br>
+5 000 000
+</p>
+
+</div>
+
+
+
+<div class="leader">
+
+<span>
+2
+</span>
+
+<p>
+Игрок
+<br>
+2 500 000
+</p>
+
+</div>
+
+
+
+
+<div class="leader">
+
+<span>
+3
+</span>
+
+<p>
+Игрок
+<br>
+1 000 000
+</p>
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+<!-- МЕНЮ -->
 
 
 <nav class="menu">
@@ -257,11 +346,37 @@
 
 
 
+
 </div>
 
 
 
-<script src="js/app.js"></script>
+
+
+<script>
+
+
+function openPage(page){
+
+
+document.querySelectorAll(".page")
+.forEach(
+item => item.classList.remove("active")
+);
+
+
+document.getElementById(page)
+.classList.add("active");
+
+
+}
+
+
+
+</script>
+
+
 
 </body>
+
 </html>
