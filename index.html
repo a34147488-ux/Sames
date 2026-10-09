@@ -1,209 +1,427 @@
+
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>World Coin Market</title>
-
-<link rel="stylesheet" href="style.css">
-
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#130824">
+  <title>Dice Casino</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
-
-
 <body>
-
-<div class="background"></div>
-
-
-<div class="container">
-
-
-<div class="brand">
-
-<div class="logo">
-WORLD COIN
-</div>
-
-<div class="market">
-MARKET
-</div>
-
-</div>
-
-
-
-<div class="main-buttons">
-
-<button class="glass-button" onclick="openBuy()">
-КУПИТЬ
-</button>
-
-<button class="glass-button" onclick="openSell()">
-ПРОДАТЬ
-</button>
-
-</div>
-
-
-
-
-<div class="course-box glass">
-
-<div class="course-title">
-ТЕКУЩИЙ КУРС
-</div>
-
-
-<div class="course-row">
-
-<span>
-Покупка
-</span>
-
-<strong>
-1 000 000 = 10.60 ₽
-</strong>
-
-</div>
-
-
-<div class="course-row">
-
-<span>
-Продажа
-</span>
-
-<strong>
-1 000 000 = 9.00 ₽
-</strong>
-
-</div>
-
-
-</div>
-
-
-
-
-<div class="limit-box glass">
-
-
-<div>
-Не покупай свыше:
-</div>
-
-<strong>
-200кк
-</strong>
-
-
-<div>
-Не продавай свыше:
-</div>
-
-<strong>
-200кк
-</strong>
-
-
-</div>
-
-</div>
-
-
-
-
-
-<div class="modal" id="modal">
-
-
-<div class="modal-card glass">
-
-
-<h2 id="modalTitle">
-Купить World Coin
-</h2>
-
-
-
-<input
-
-id="coinInput"
-
-type="number"
-
-placeholder="Количество коинов"
-
-oninput="calculateFromCoins()"
-
->
-
-
-
-
-<input
-
-id="rubInput"
-
-type="number"
-
-placeholder="Сумма в рублях"
-
-oninput="calculateFromRub()"
-
->
-
-
-
-
-<div class="calculate-box">
-
-
-<span>
-Итого:
-</span>
-
-
-<strong id="rubResult">
-0.00 ₽
-</strong>
-
-
-</div>
-
-
-
-<button id="mainAction" class="action-button">
-
-Продолжить
-
-</button>
-
-
-
-<button class="close-button" onclick="closeModal()">
-
-Закрыть
-
-</button>
-
-
-</div>
-
-
-</div>
-
-
-
-
-<script src="app.js"></script>
-
-
+  <div class="background-glow glow-one"></div>
+  <div class="background-glow glow-two"></div>
+  <div class="background-glow glow-three"></div>
+
+  <div id="app" class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">D</div>
+        <div>
+          <div class="brand-name">DICE <span>CASINO</span></div>
+          <div class="brand-caption">ИГРОВОЙ КЛУБ</div>
+        </div>
+      </div>
+
+      <div class="balance-box">
+        <div class="balance-pattern"></div>
+        <svg class="coin-icon" viewBox="0 0 40 40" aria-label="Монета">
+          <defs>
+            <linearGradient id="coinGold" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#fff1a3"/>
+              <stop offset="45%" stop-color="#ffc62f"/>
+              <stop offset="100%" stop-color="#b76b05"/>
+            </linearGradient>
+          </defs>
+          <circle cx="20" cy="20" r="17" fill="url(#coinGold)" stroke="#fff0a0" stroke-width="1.5"/>
+          <circle cx="20" cy="20" r="12.5" fill="none" stroke="#a86608" stroke-width="1.4"/>
+          <path d="M24 12 L15 21 L21 21 L16 28 L26 18 L20 18 Z" fill="#8a4a00"/>
+        </svg>
+        <div class="balance-text">
+          <span class="balance-label">ВАШ БАЛАНС</span>
+          <strong id="headerBalance">0</strong>
+        </div>
+      </div>
+    </header>
+
+    <main id="mainContent">
+      <section id="homeScreen" class="screen active">
+        <div class="hero">
+          <div class="hero-orbit orbit-a"></div>
+          <div class="hero-orbit orbit-b"></div>
+
+          <div class="hero-emblem">
+            <div class="hero-die die-dark">
+              <span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span>
+            </div>
+            <div class="hero-die die-gold">
+              <span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+
+          <div class="hero-overline">ТВОЯ ИГРА. ТВОИ РЕШЕНИЯ.</div>
+          <h1>ИСПЫТАЙ<br><span>УДАЧУ</span></h1>
+          <p>Четыре игровых режима. Один клуб.</p>
+
+          <button class="play-main" onclick="navigateTo('gamesScreen')">
+            <span class="play-main-light"></span>
+            <span class="play-main-title">ИГРАТЬ</span>
+            <span class="play-main-arrow">›</span>
+          </button>
+        </div>
+
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">ВЫБЕРИ СВОЙ РЕЖИМ</span>
+            <h2>Игровой зал</h2>
+          </div>
+          <span class="live-indicator"><i></i> РАУНДЫ</span>
+        </div>
+
+        <div class="game-grid">
+          <button class="game-card wheel-card" onclick="openGame('wheel')">
+            <div class="game-art art-wheel">
+              <div class="drawn-die black-die"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+              <div class="drawn-die white-die"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            </div>
+            <div class="game-card-info">
+              <strong>Dice Wheel</strong>
+              <span>Два кубика · ставки на исход</span>
+            </div>
+            <span class="card-arrow">›</span>
+          </button>
+
+          <button class="game-card dice-card" onclick="openGame('dice')">
+            <div class="game-art art-dice">
+              <div class="drawn-die white-die large-die"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            </div>
+            <div class="game-card-info">
+              <strong>Dice</strong>
+              <span>Один кубик · от 1 до 6</span>
+            </div>
+            <span class="card-arrow">›</span>
+          </button>
+
+          <button class="game-card zeus-card" onclick="openGame('zeus')">
+            <div class="game-art art-zeus">
+              <div class="slot-frame">
+                <div class="slot-die">6</div>
+                <div class="slot-die">3</div>
+                <div class="slot-die">6</div>
+              </div>
+            </div>
+            <div class="game-card-info">
+              <strong>Dice Zeus</strong>
+              <span>Слоты с кубиками и множителями</span>
+            </div>
+            <span class="card-arrow">›</span>
+          </button>
+
+          <button class="game-card house-card" onclick="openGame('house')">
+            <div class="game-art art-house">
+              <div class="house-roof"></div>
+              <div class="house-dice">
+                <span>2</span><span>5</span><span>6</span>
+              </div>
+            </div>
+            <div class="game-card-info">
+              <strong>Dice House</strong>
+              <span>Слоты, символы и бонусные раунды</span>
+            </div>
+            <span class="card-arrow">›</span>
+          </button>
+        </div>
+
+        <div class="home-bottom-panel">
+          <div class="panel-decoration"></div>
+          <div>
+            <span class="eyebrow">ТВОЙ РЕЗУЛЬТАТ</span>
+            <strong>Играй ответственно</strong>
+            <p>Перед каждой игрой проверяй размер ставки.</p>
+          </div>
+          <div class="panel-medallion">D</div>
+        </div>
+      </section>
+
+      <section id="gamesScreen" class="screen">
+        <div class="page-heading">
+          <button class="back-button" onclick="navigateTo('homeScreen')">‹</button>
+          <div>
+            <span class="eyebrow">ИГРОВОЙ ЗАЛ</span>
+            <h2>Выбери режим</h2>
+          </div>
+        </div>
+
+        <div class="mini-balance">
+          <span>БАЛАНС</span>
+          <div class="mini-balance-value">
+            <span class="small-coin"></span>
+            <strong id="gamesBalance">0</strong>
+          </div>
+        </div>
+
+        <div class="mode-list">
+          <button class="mode-row" onclick="openGame('wheel')">
+            <div class="mode-icon mode-icon-wheel">
+              <div class="mini-die dark-mini"></div>
+              <div class="mini-die light-mini"></div>
+            </div>
+            <div class="mode-copy"><strong>Dice Wheel</strong><span>Два кубика и золотый исход</span></div>
+            <span class="mode-chevron">›</span>
+          </button>
+          <button class="mode-row" onclick="openGame('dice')">
+            <div class="mode-icon mode-icon-dice"><div class="mini-die light-mini"></div></div>
+            <div class="mode-copy"><strong>Dice</strong><span>Классические ставки на кубик</span></div>
+            <span class="mode-chevron">›</span>
+          </button>
+          <button class="mode-row" onclick="openGame('zeus')">
+            <div class="mode-icon mode-icon-zeus"><div class="mini-slot">6 3 6</div></div>
+            <div class="mode-copy"><strong>Dice Zeus</strong><span>Слотовый режим с множителями</span></div>
+            <span class="mode-chevron">›</span>
+          </button>
+          <button class="mode-row" onclick="openGame('house')">
+            <div class="mode-icon mode-icon-house"><div class="mini-slot house-mini">2 5 6</div></div>
+            <div class="mode-copy"><strong>Dice House</strong><span>Кубики и специальные комбинации</span></div>
+            <span class="mode-chevron">›</span>
+          </button>
+        </div>
+      </section>
+
+      <section id="gameScreen" class="screen">
+        <div class="page-heading">
+          <button class="back-button" onclick="navigateTo('gamesScreen')">‹</button>
+          <div>
+            <span class="eyebrow">ИГРОВОЙ РЕЖИМ</span>
+            <h2 id="gameTitle">Dice Wheel</h2>
+          </div>
+        </div>
+
+        <div class="mini-balance game-balance">
+          <span>ВАШ БАЛАНС</span>
+          <div class="mini-balance-value">
+            <span class="small-coin"></span>
+            <strong id="gameBalance">0</strong>
+          </div>
+        </div>
+
+        <div class="round-panel">
+          <div>
+            <span class="eyebrow">ТЕКУЩИЙ РАУНД</span>
+            <strong id="roundNumber">#000001</strong>
+          </div>
+          <div class="round-status"><i></i><span id="roundStatus">Приём ставок</span></div>
+          <div class="round-timer" id="roundTimer">15</div>
+        </div>
+
+        <div class="game-stage" id="gameStage">
+          <div class="stage-glow"></div>
+          <div id="diceDisplay" class="dice-display">
+            <div class="drawn-die white-die result-die"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="drawn-die black-die result-die"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+          <div class="stage-caption" id="stageCaption">СДЕЛАЙ СТАВКУ</div>
+          <div class="stage-subcaption" id="stageSubcaption">Раунд начнётся после завершения приёма ставок</div>
+        </div>
+
+        <div class="bet-section">
+          <div class="bet-section-heading">
+            <h3>Выберите ставку</h3>
+            <span>Коэффициент указан на кнопке</span>
+          </div>
+          <div id="betOptions" class="bet-options"></div>
+
+          <div class="bet-amount-panel">
+            <label for="betAmount">Сумма ставки</label>
+            <div class="bet-stepper">
+              <button type="button" onclick="changeBet(-1)">−</button>
+              <input id="betAmount" type="number" inputmode="numeric" min="1" step="1" value="1000">
+              <button type="button" onclick="changeBet(1)">+</button>
+            </div>
+            <div class="bet-presets">
+              <button type="button" onclick="setBet(100)">100</button>
+              <button type="button" onclick="setBet(500)">500</button>
+              <button type="button" onclick="setBet(1000)">1 000</button>
+              <button type="button" onclick="setBet(5000)">5 000</button>
+            </div>
+          </div>
+
+          <div class="potential-win">
+            <span>Возможная выплата</span>
+            <strong><span class="small-coin"></span><span id="potentialWin">12 000</span></strong>
+          </div>
+          <button id="placeBetButton" class="action-button" onclick="placeBet()">СДЕЛАТЬ СТАВКУ</button>
+          <p class="game-note">Ставка подтверждается перед началом раунда. Результаты рассчитываются сервером.</p>
+        </div>
+
+        <div class="history-panel">
+          <div class="section-heading compact-heading">
+            <div><span class="eyebrow">ИСТОРИЯ</span><h3>Последние раунды</h3></div>
+          </div>
+          <div id="roundHistory" class="round-history">
+            <div class="history-empty">История появится после завершения раундов</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="profileScreen" class="screen">
+        <div class="page-heading">
+          <button class="back-button" onclick="navigateTo('homeScreen')">‹</button>
+          <div><span class="eyebrow">ЛИЧНЫЙ КАБИНЕТ</span><h2>Профиль</h2></div>
+        </div>
+
+        <div class="profile-card">
+          <div class="profile-avatar" id="profileAvatar">D</div>
+          <div class="profile-identity">
+            <span class="eyebrow">ВАШ НИК</span>
+            <strong id="profileNickname">Игрок</strong>
+            <span id="profileId">ID: —</span>
+          </div>
+          <button class="edit-nickname" onclick="navigateTo('moreScreen')">ИЗМЕНИТЬ</button>
+        </div>
+
+        <div class="profile-balance-card">
+          <span class="eyebrow">ТЕКУЩИЙ БАЛАНС</span>
+          <div class="profile-balance-value"><span class="large-coin"></span><strong id="profileBalance">0</strong></div>
+          <div class="profile-money-actions">
+            <button class="action-button" onclick="openMoneyModal('deposit')">ПОПОЛНИТЬ</button>
+            <button class="action-button secondary-action" onclick="openMoneyModal('withdraw')">ВЫВЕСТИ</button>
+          </div>
+          <p class="money-rate">1 000 монет = 0,90 ₽ · Минимальный вывод 1 000 000 монет</p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="eyebrow">ЗА ВСЁ ВРЕМЯ</span>
+            <div class="stat-line"><span>Выиграно</span><strong class="positive" id="totalWon">0</strong></div>
+            <div class="stat-line"><span>Проиграно</span><strong class="negative" id="totalLost">0</strong></div>
+          </div>
+          <div class="stat-card">
+            <span class="eyebrow">ЗА НЕДЕЛЮ</span>
+            <div class="stat-line"><span>Выиграно</span><strong class="positive" id="weekWon">0</strong></div>
+            <div class="stat-line"><span>Проиграно</span><strong class="negative" id="weekLost">0</strong></div>
+          </div>
+        </div>
+
+        <div class="rank-card">
+          <div class="rank-emblem">#</div>
+          <div><span class="eyebrow">ВАША ПОЗИЦИЯ</span><strong id="profileRank">Загрузка рейтинга</strong><span>Топ считается по фактически выигранным монетам</span></div>
+        </div>
+
+        <button class="subscription-card" onclick="openSubscription()">
+          <div class="subscription-star">★</div>
+          <div><strong>Подписка</strong><span>Особый статус и оформление профиля</span></div>
+          <span class="card-arrow">›</span>
+        </button>
+      </section>
+
+      <section id="topScreen" class="screen">
+        <div class="page-heading">
+          <button class="back-button" onclick="navigateTo('homeScreen')">‹</button>
+          <div><span class="eyebrow">ЛИДЕРЫ КЛУБА</span><h2>Топ игроков</h2></div>
+        </div>
+
+        <div class="top-info">
+          <span class="eyebrow">РЕЙТИНГ ПО ВЫИГРЫШАМ</span>
+          <h3>Кто выиграл больше?</h3>
+          <p>Учитываются подтверждённые выигрыши за всё время. Баланс, пополнения, переводы и промокоды не повышают рейтинг.</p>
+        </div>
+
+        <div class="prize-podium">
+          <div class="podium-place second-place">
+            <div class="podium-crown">2</div>
+            <div class="podium-name" id="topSecondName">Игрок 2</div>
+            <div class="podium-winnings"><span class="small-coin"></span><strong id="topSecondWon">0</strong></div>
+            <div class="podium-prize"><span class="small-coin"></span>1 500 000</div>
+          </div>
+          <div class="podium-place first-place">
+            <div class="podium-crown">1</div>
+            <div class="podium-name" id="topFirstName">Игрок 1</div>
+            <div class="podium-winnings"><span class="small-coin"></span><strong id="topFirstWon">0</strong></div>
+            <div class="podium-prize"><span class="small-coin"></span>2 500 000</div>
+          </div>
+          <div class="podium-place third-place">
+            <div class="podium-crown">3</div>
+            <div class="podium-name" id="topThirdName">Игрок 3</div>
+            <div class="podium-winnings"><span class="small-coin"></span><strong id="topThirdWon">0</strong></div>
+            <div class="podium-prize"><span class="small-coin"></span>1 000 000</div>
+          </div>
+        </div>
+
+        <div class="leaderboard-panel">
+          <div class="leaderboard-heading"><span>МЕСТО / ИГРОК</span><span>ВСЕГО ВЫИГРАНО</span></div>
+          <div id="leaderboardList"><div class="history-empty">Рейтинг появится после подключения сервера</div></div>
+        </div>
+      </section>
+
+      <section id="moreScreen" class="screen">
+        <div class="page-heading">
+          <button class="back-button" onclick="navigateTo('homeScreen')">‹</button>
+          <div><span class="eyebrow">НАСТРОЙКИ И СЕРВИСЫ</span><h2>Ещё</h2></div>
+        </div>
+
+        <div class="more-list">
+          <button class="more-row" onclick="openUtility('nickname')"><span class="more-icon">N</span><span><strong>Изменить ник</strong><small>Выбери имя игрока</small></span><b>›</b></button>
+          <button class="more-row" onclick="openUtility('color')"><span class="more-icon color-icon">A</span><span><strong>Цвет ника</strong><small>Настрой оформление профиля</small></span><b>›</b></button>
+          <button class="more-row" onclick="openUtility('promo')"><span class="more-icon">P</span><span><strong>Промокоды</strong><small>Активировать или создать</small></span><b>›</b></button>
+          <button class="more-row" onclick="openUtility('referrals')"><span class="more-icon">R</span><span><strong>Реферальная система</strong><small>Приглашения и вознаграждения</small></span><b>›</b></button>
+          <button class="more-row" onclick="openUtility('transfer')"><span class="more-icon">↗</span><span><strong>Перевод монет</strong><small>Переведи монеты другому игроку</small></span><b>›</b></button>
+          <button class="more-row agreement-row" onclick="openUtility('agreement')"><span class="more-icon agreement-icon">§</span><span><strong>Пользовательское соглашение</strong><small>Правила использования приложения</small></span><b>›</b></button>
+        </div>
+
+        <div class="version-label">DICE CASINO · ВЕРСИЯ 1.0</div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav">
+      <button class="nav-item" data-screen="profileScreen" onclick="navigateTo('profileScreen')">
+        <span class="nav-art profile-art"><i></i></span><span>Профиль</span>
+      </button>
+      <button class="nav-item nav-play active" data-screen="homeScreen" onclick="navigateTo('homeScreen')">
+        <span class="nav-art play-art"><i></i></span><span>Играть</span>
+      </button>
+      <button class="nav-item" data-screen="topScreen" onclick="navigateTo('topScreen')">
+        <span class="nav-art top-art"><i></i></span><span>Топ</span>
+      </button>
+      <button class="nav-item" data-screen="moreScreen" onclick="navigateTo('moreScreen')">
+        <span class="nav-art more-art"><i></i></span><span>Ещё</span>
+      </button>
+    </nav>
+  </div>
+
+  <div id="modalBackdrop" class="modal-backdrop" onclick="closeModalFromBackdrop(event)">
+    <div id="modalCard" class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button class="modal-close" onclick="closeModal()">×</button>
+      <div class="modal-decoration"></div>
+      <span class="eyebrow" id="modalEyebrow">DICE CASINO</span>
+      <h2 id="modalTitle">Подтверждение</h2>
+      <div id="modalBody"></div>
+      <div id="modalActions" class="modal-actions"></div>
+    </div>
+  </div>
+
+  <div id="resultOverlay" class="result-overlay">
+    <div class="result-card" id="resultCard">
+      <div class="result-symbol" id="resultSymbol">D</div>
+      <span class="eyebrow" id="resultEyebrow">РЕЗУЛЬТАТ РАУНДА</span>
+      <h2 id="resultTitle">ВЫ ВЫИГРАЛИ</h2>
+      <div class="result-amount"><span class="large-coin"></span><strong id="resultAmount">0</strong></div>
+      <p id="resultDescription"></p>
+      <button class="action-button" onclick="closeResult()">ПРОДОЛЖИТЬ</button>
+    </div>
+  </div>
+
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-emblem">D</div>
+    <div class="loading-title">DICE CASINO</div>
+    <div class="loading-subtitle" id="loadingText">Загрузка игрового зала</div>
+    <div class="loading-track"><span></span></div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="app.js"></script>
 </body>
-
 </html>
