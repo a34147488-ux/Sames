@@ -2349,3 +2349,67 @@ button:focus-visible, input:focus-visible {
     transition-duration: .01ms !important;
   }
 }
+/* FIX: восстановление нажатий в Dice Casino */
+
+.background-glow,
+.hero-orbit,
+.hero-emblem,
+.hero-die,
+.hero-emblem *,
+.balance-pattern,
+.stage-glow,
+.panel-decoration,
+.modal-decoration,
+.hero::before,
+.hero::after {
+pointer-events: none !important;
+}
+
+#app {
+position: relative;
+z-index: 1;
+pointer-events: auto;
+}
+
+#mainContent,
+.screen,
+.topbar,
+.bottom-nav,
+.game-grid,
+.game-card,
+.mode-list,
+.mode-row,
+button,
+input {
+pointer-events: auto;
+}
+
+#loadingOverlay,
+#resultOverlay,
+#modalBackdrop {
+z-index: 9999;
+}
+
+#loadingOverlay:not(.show),
+#resultOverlay:not(.show),
+#modalBackdrop:not(.show) {
+pointer-events: none !important;
+visibility: hidden;
+}
+
+#loadingOverlay.show,
+#resultOverlay.show,
+#modalBackdrop.show {
+pointer-events: auto;
+visibility: visible;
+}
+
+button {
+cursor: pointer;
+-webkit-tap-highlight-color: transparent;
+touch-action: manipulation;
+}
+
+button:disabled {
+cursor: default;
+}
