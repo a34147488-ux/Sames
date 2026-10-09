@@ -514,3 +514,27 @@ input::placeholder {
 
 
 }
+.limit-box {
+
+    margin-top:20px;
+
+    padding:20px;
+
+    border-radius:25px;
+
+    text-align:center;
+
+    font-size:15px;
+
+}
+
+
+.limit-box strong {
+
+    display:block;
+
+    font-size:22px;
+
+    margin:8px 0 18px;
+
+}
